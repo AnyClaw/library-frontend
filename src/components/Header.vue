@@ -8,7 +8,11 @@ function goToMainPage() {
 }
 
 function goToProfile() {
-    router.push({name: "Profile"})
+    const user = localStorage.getItem('user')
+    console.log(user)
+    
+    if (user && user !== 'undefined' && user !== 'null') router.push({name: "Profile"})
+    else router.push({name: 'Login'})
 }
 </script>
 
@@ -33,7 +37,7 @@ function goToProfile() {
 header {
     display: grid;
     grid-template-columns: 20% 60% 20%;
-    margin-top: 20px;
+    margin: 20px 0;
 }
 
 img {

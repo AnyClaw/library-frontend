@@ -1,16 +1,18 @@
 <script setup>
 import { useRoute, useRouter } from 'vue-router';
-import Header from '@/components/Header.vue';
 import axios from 'axios';
 import { onMounted, ref, watch } from 'vue';
 
 import BookCard from '@/components/BookCard.vue';
+import Header from '@/components/Header.vue';
+import OrderAmount from '@/components/OrderAmount.vue';
 
 const route = useRoute()
 const router = useRouter()
 
 const currentBook = ref(null)
 const authorBooks = ref([])
+const amount = ref()
 const isLoading = ref(false)
 
 async function getBookById() {
@@ -30,7 +32,7 @@ async function getBooksByAuthor() {
     isLoading.value = true
 
     try {
-        const response = await axios.get(`http://localhost:8080/books/author/${currentBook.value.author.id}`)
+        const response = await axios.get(`http://localhost:8080/books?authorId=${currentBook.value.author.id}&amount=3&page=0`)
         authorBooks.value = response.data
     } catch (error) {
         console.log(error)
@@ -43,11 +45,18 @@ function goToBookInfo(bookId) {
     router.push({name: 'BookInfo', params: {id: bookId}})
 }
 
+function goToAuthorBooks() {
+    router.push({name: 'AuthorBooks', params: {id: currentBook.value.author.id}})
+}
+
 async function read() {
     isLoading.value = true
 
     try {
-        await axios.put(`http://localhost:8080/books/read`, currentBook.value)
+        const userId = JSON.parse(localStorage.getItem('user')).id
+        await axios.post(
+            `http://localhost:8080/basket/add?userId=${userId}&bookId=${currentBook.value.id}&amount=${amount.value.amount}`
+        )
         alert('Книга добавлена')
     } catch (error) {
         console.log(error)
@@ -83,7 +92,8 @@ onMounted(async () => {
                     <div class="name" style="margin-bottom: 0;">{{ currentBook.author.name }}</div>
                     <div class="name">{{ "\"" + currentBook.name + "\"" }}</div>
                     <div>{{ currentBook.description }}</div>
-                    <div><button @click="read">Читать</button></div>
+                    <div><button @click="read">Добавить в корзину</button></div>
+                    <div><OrderAmount ref="amount"></OrderAmount></div>
                 </li>
                 <li>
                     <img src="/example.png"></img>
@@ -100,7 +110,7 @@ onMounted(async () => {
                             <div>{{ book.authorName }}</div>
                         </BookCard>
                     </div>
-                    <button>Все книги автора</button>
+                    <button @click="goToAuthorBooks">Все книги автора</button>
                 </div>
             </div>
         </div>
@@ -114,7 +124,8 @@ main {
 }
 
 .book-title {
-    height: 500px;
+    min-height: 500px;
+    height: auto;
     padding: 50px;
     display: grid;
     grid-template-columns: 50% 50%;
