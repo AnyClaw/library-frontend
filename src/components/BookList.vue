@@ -64,7 +64,7 @@ onMounted((() => {
     <div class="title">
       <slot></slot>
     </div>
-
+    
     <ul class="catalog">
       <li></li>
       <li>
@@ -95,5 +95,7 @@ onMounted((() => {
 .catalog {
   display: grid;
   grid-template-columns: 15% 70% 15%;
+  max-width: 1500px;
+  margin: auto;
 }
 </style>
